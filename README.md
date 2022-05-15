@@ -1,2 +1,2 @@
-# serverles-practice-202205
+# Serverless Practice, May 2022.
 My practice for Serverless during May 2022
