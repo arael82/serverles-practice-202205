@@ -10,12 +10,13 @@ provider:
     REGION: ${self:provider.region}
     PENDING_ORDER_QUEUE:
       Ref: PendingOrdersQueue
+    PENDING_ORDER_QUEUE_NAME: PendingOrdersQueue
   iamRoleStatements:
    - Effect: Allow
      Action:
        - sqs:*
      Resource:
-       Fn::GetAtt: [ PendingOrdersQueue, Arn ]
+       Fn::GetAtt: [ "${self:provider.environment.PENDING_ORDER_QUEUE_NAME}", Arn ]
 
 
 functions:
@@ -25,10 +26,19 @@ functions:
       - http:
           method: post
           path: pedido
+  prepararPedido:
+    handler: handler.prepararPedido
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - PendingOrdersQueue
+              - Arn
+          batchSize: 1
       
 resources:
   Resources:
     PendingOrdersQueue: 
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: "PendingOrdersQueue"
+        QueueName: ${self:provider.environment.PENDING_ORDER_QUEUE_NAME}
