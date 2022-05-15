@@ -12,11 +12,33 @@ AWS.config.update({region:REGION});
 var sqs = new AWS.SQS();
 
 module.exports.hacerPedido = (event, context, callback) => {
+  
   console.log('HacerPedido fue llamada');
+  console.log(event);
+
+  let body; 
+  
+  if (event.body !== null && event.body !== undefined) {
+    body = JSON.parse(event.body)
+  } else {
+    const message = {
+      message: `Necesita un request body válido.`
+    };
+    sendResponse(400, message, callback)
+  }
+
+  const address = body.address;
+  const clientName = body.name;
+  const pizzas = body.pizzas;
+
   const orderId = crypto.randomUUID();
 
   const params = {
-    MessageBody: JSON.stringify({ orderId: orderId }),
+    MessageBody: JSON.stringify({ 
+      orderId: orderId,
+      clientName: clientName, 
+      address: address, 
+      pizzas: pizzas }),
     QueueUrl: QUEUE_URL
   };
 
