@@ -1,0 +1,34 @@
+service: pedirPizzas
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-west-1
+  environment:
+    REGION: ${self:provider.region}
+    PENDING_ORDER_QUEUE:
+      Ref: PendingOrdersQueue
+  iamRoleStatements:
+   - Effect: Allow
+     Action:
+       - sqs:*
+     Resource:
+       Fn::GetAtt: [ PendingOrdersQueue, Arn ]
+
+
+functions:
+  hacerPedido:
+    handler: handler.hacerPedido
+    events:
+      - http:
+          method: post
+          path: pedido
+      
+resources:
+  Resources:
+    PendingOrdersQueue: 
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "PendingOrdersQueue"
