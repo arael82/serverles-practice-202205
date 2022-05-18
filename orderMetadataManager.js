@@ -9,6 +9,7 @@ const REGION = process.env.REGION
 AWS.config.update({region:REGION});
 
 
+
 module.exports.saveCompletedOrder = order => {
 
     console.log('Guardar un pedido fue llamado.');
@@ -21,6 +22,22 @@ module.exports.saveCompletedOrder = order => {
     };
 
     return dynamo.put(params).promise();
+}
+
+module.exports.getOrder = orderId => {
+
+    console.log(`Buscar un pedido fue llamado. Orden: ${orderId}`);
+
+    const delivery_status = "READY_FOR_DELIVERY";
+
+    const params = {
+        TableName: process.env.COMPLETED_ORDERS_TABLE,
+        Key: {
+          orderId: `${orderId}`,
+        },
+      };
+
+    return dynamo.get(params).promise();
 }
 
 module.exports.deliverOrder = orderId => {

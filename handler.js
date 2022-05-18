@@ -97,6 +97,24 @@ module.exports.enviarPedido = (event, context, callback) => {
   callback();
 };
 
+module.exports.verPedido = (event, context, callback) => {
+  console.log('verPedido fue llamada')
+  console.log(event);
+  console.log(event.pathParameters);
+  const orderId = event.pathParameters.orderId;
+  console.log(`Se va a buscar el estado de la orden ${orderId}`);
+
+  orderMetadataManager.getOrder(orderId).then(data => {
+    const result = `La orden ${orderId} se encuentra bajo el estado: ${data.Item.delivery_status}`;
+    console.log(result);
+    sendResponse(200, result, callback);
+  }).catch(error => {
+    console.error(`La orden ${orderId} no se pudo encontrar con éxito debido a un error.`);
+    sendResponse(500, error, callback);
+  });
+
+};
+
 
 function sendResponse(statusCode, message, callback) {
   

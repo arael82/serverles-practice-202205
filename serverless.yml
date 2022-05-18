@@ -29,6 +29,12 @@ provider:
 
 
 functions:
+  verEstadoPedido:
+    handler: handler.verPedido
+    events:
+      - http:
+          method: get
+          path: pedido/{orderId}
   hacerPedido:
     handler: handler.hacerPedido
     events:
