@@ -22,3 +22,25 @@ module.exports.saveCompletedOrder = order => {
 
     return dynamo.put(params).promise();
 }
+
+module.exports.deliverOrder = orderId => {
+
+    console.log('Entregar un pedido fue llamado.');
+
+    const delivery_status = "READY_FOR_DELIVERY";
+
+    const params = {
+        TableName: process.env.COMPLETED_ORDERS_TABLE,
+        Key: {
+            orderId
+        },
+        ConditionExpression: 'attribute_exists(orderId)',
+        UpdateExpression: 'set delivery_status = :v',
+        ExpressionAttributeValues: {
+            ':v': 'DELIVERED'
+        },
+        ReturnValues: 'ALL_NEW'
+    };
+
+    return dynamo.update(params).promise();
+}

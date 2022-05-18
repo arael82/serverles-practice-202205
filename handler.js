@@ -15,8 +15,8 @@ var sqs = new AWS.SQS();
 
 module.exports.hacerPedido = (event, context, callback) => {
   
-  console.log('HacerPedido fue llamada');
-  console.log(event);
+  console.log('hacerPedido fue llamada');
+  console.debug(event);
 
   let body; 
   
@@ -60,8 +60,8 @@ module.exports.hacerPedido = (event, context, callback) => {
 
 module.exports.prepararPedido = (event, context, callback) => {
   
-  console.log('PrepararPedido fue llamada');
-  console.log(event)
+  console.log('prepararPedido fue llamada');
+  console.debug(event)
   const order = JSON.parse(event.Records[0].body);
 
   console.log(`Llegó orden ${order.orderId}`);
@@ -77,6 +77,26 @@ module.exports.prepararPedido = (event, context, callback) => {
 
   callback();
 };
+
+module.exports.enviarPedido = (event, context, callback) => {
+  console.log('enviarPedido fue llamada')
+  
+  const record = event.Records[0];
+
+  if(record.eventName === 'INSERT') {
+    const orderId = record.dynamodb.Keys.orderId.S;
+    console.log(`Se va a registrar la entrega de la orden ${orderId}`);
+    orderMetadataManager.deliverOrder(orderId).then(data => {
+      console.log(`La orden ${orderId} se entregó con éxito.`);
+      callback();
+    }).catch(error => {
+      console.error(`La orden ${orderId} no se pudo entregar debido a un error.`);
+      callback(error);
+    });
+  }
+  callback();
+};
+
 
 function sendResponse(statusCode, message, callback) {
   
