@@ -11,12 +11,21 @@ provider:
     PENDING_ORDER_QUEUE:
       Ref: PendingOrdersQueue
     PENDING_ORDER_QUEUE_NAME: PendingOrdersQueue
+    COMPLETED_ORDERS_TABLE: CompletedOrdersTable
   iamRoleStatements:
    - Effect: Allow
      Action:
        - sqs:*
      Resource:
        Fn::GetAtt: [ "${self:provider.environment.PENDING_ORDER_QUEUE_NAME}", Arn ]
+   - Effect: Allow
+     Action:
+       - dynamodb:GetItem
+       - dynamodb:PutItem
+       - dynamodb:UpdateItem
+       - dynamodb:DeleteItem 
+     Resource:
+       Fn::GetAtt: [ "${self:provider.environment.COMPLETED_ORDERS_TABLE}", Arn ]
 
 
 functions:
@@ -42,3 +51,16 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: ${self:provider.environment.PENDING_ORDER_QUEUE_NAME}
+    CompletedOrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "orderId"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "orderId"
+            KeyType: "HASH"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.COMPLETED_ORDERS_TABLE}

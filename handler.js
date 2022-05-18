@@ -9,6 +9,8 @@ const REGION = process.env.REGION
 
 AWS.config.update({region:REGION});
 
+const orderMetadataManager = require('./orderMetadataManager');
+
 var sqs = new AWS.SQS();
 
 module.exports.hacerPedido = (event, context, callback) => {
@@ -57,8 +59,22 @@ module.exports.hacerPedido = (event, context, callback) => {
 };
 
 module.exports.prepararPedido = (event, context, callback) => {
+  
   console.log('PrepararPedido fue llamada');
-  console.log(event);
+  console.log(event)
+  const order = JSON.parse(event.Records[0].body);
+
+  console.log(`Llegó orden ${order.orderId}`);
+
+  orderMetadataManager.saveCompletedOrder(order).then(data => {
+    console.log(`La orden ${order.orderId} se guardó con éxito.`);
+    callback();
+  }).catch(error => {
+    console.error(`La orden ${order.orderId} no se pudo guardar debido a un error.`);
+    callback(error);
+  });
+
+
   callback();
 };
 
